@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:padding="6dip" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/left_layout"
+        android:layout_toLeftOf="@+id/product_price"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/product_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="6dip"
+            android:contentDescription="TODO"
+            android:src="@drawable/ic_corp_icon" />
+
+        <TextView
+            android:id="@+id/product_description"
+            android:layout_width="fill_parent"
+            android:layout_height="26dip"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@id/product_icon"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:text="Mleko UHT 2.0% tłuszczu"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/product_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/product_description"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toRightOf="@id/product_icon"
+            android:gravity="center_vertical"
+            android:text="Mleko łaciate"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/product_price"
+        android:layout_width="36dp"
+        android:layout_height="26dip"
+        android:gravity="center_vertical"
+        android:layout_alignParentRight="true"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:text="50 $"
+        android:textSize="12sp" />
+
+</RelativeLayout>
