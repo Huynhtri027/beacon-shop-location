@@ -18,6 +18,10 @@
 
         <service android:name="com.kontakt.sdk.android.ble.service.ProximityService" android:exported="false"/>
 
+        <meta-data
+            android:name="kontakt.io.API_KEY"
+            android:value="hUrdLGZJZQDIpoMudvpASiCLifXrSeRy" />
+
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
@@ -29,8 +33,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.MapActivity" >
-        </activity>
+        <activity android:name=".activities.MapActivity" />
     </application>
 
 </manifest>

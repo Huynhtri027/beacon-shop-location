@@ -3,15 +3,18 @@ package com.example.sebo.shoplocationmobile.beacons;
 import android.content.Context;
 import android.util.Log;
 
+import com.kontakt.sdk.android.ble.configuration.ScanPeriod;
 import com.kontakt.sdk.android.ble.configuration.scan.EddystoneScanContext;
 import com.kontakt.sdk.android.ble.configuration.scan.IBeaconScanContext;
 import com.kontakt.sdk.android.ble.configuration.scan.ScanContext;
+import com.kontakt.sdk.android.ble.connection.OnServiceReadyListener;
 import com.kontakt.sdk.android.ble.discovery.BluetoothDeviceEvent;
 import com.kontakt.sdk.android.ble.discovery.EventType;
 import com.kontakt.sdk.android.ble.manager.ProximityManager;
 import com.kontakt.sdk.android.common.model.Beacon;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Sebo on 2015-11-16.
@@ -40,14 +43,34 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
                 .build();
 
         ScanContext scanContext = new ScanContext.Builder()
-                .setEddystoneScanContext(eddystoneScanContext)
-                .setIBeaconScanContext(iBeaconScanContext)
+                .setEddystoneScanContext(EddystoneScanContext.DEFAULT)
+                .setIBeaconScanContext(IBeaconScanContext.DEFAULT)
+                .setScanPeriod(new ScanPeriod(TimeUnit.SECONDS.toMillis(7), TimeUnit.SECONDS.toMillis(0)))
                 .build();
 
         proximityManager = new ProximityManager(context);
+        proximityManager.connect(new OnServiceReadyListener() {
+            @Override
+            public void onServiceReady() {
+                Log.d(TAG, "kontakt.io backend connected");
+            }
+
+            @Override
+            public void onConnectionFailure() {
+                Log.d(TAG, "kontakt.io backend connection failure.");
+            }
+        });
         proximityManager.attachListener(this);
         proximityManager.initializeScan(scanContext);
         Log.d(TAG, "starting scan");
+
+        if (proximityManager.isScanning()) {
+            Log.d(TAG, "PM is scanning");
+        }
+
+        if (proximityManager.isConnected()) {
+            Log.d(TAG, "PM is connected");
+        }
     }
 
     @Override
