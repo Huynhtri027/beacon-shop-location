@@ -1,6 +1,7 @@
 package com.example.sebo.shoplocationmobile.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -13,6 +14,11 @@ import android.view.ViewGroup;
 import com.example.sebo.shoplocationmobile.R;
 import com.example.sebo.shoplocationmobile.adapters.BeaconListAdapter;
 import com.example.sebo.shoplocationmobile.beacons.BeaconScanner;
+import com.kontakt.sdk.android.ble.service.ProximityService;
+import com.kontakt.sdk.android.common.profile.IBeaconDevice;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,7 +28,7 @@ import com.example.sebo.shoplocationmobile.beacons.BeaconScanner;
  * Use the {@link BeaconFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BeaconFragment extends Fragment {
+public class BeaconFragment extends Fragment implements BeaconScanner.BeaconScanListener {
     public static final String TAG = BeaconFragment.class.getSimpleName();
 
     // TODO: Rename parameter arguments, choose names that match
@@ -37,6 +43,8 @@ public class BeaconFragment extends Fragment {
     private BeaconScanner beaconScanner;
 
     private OnFragmentInteractionListener mListener;
+
+    private List<IBeaconDevice> deviceList = new ArrayList<>();
 
     private RecyclerView beaconList;
     private BeaconListAdapter bAdapter;
@@ -69,7 +77,7 @@ public class BeaconFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        beaconScanner = new BeaconScanner(getActivity());
+        beaconScanner = new BeaconScanner(getActivity(), this);
     }
 
     @Override
@@ -83,7 +91,7 @@ public class BeaconFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         beaconList.setLayoutManager(linearLayoutManager);
 
-        bAdapter = new BeaconListAdapter();
+        bAdapter = new BeaconListAdapter(deviceList);
         beaconList.setAdapter(bAdapter);
         beaconList.addOnItemTouchListener(new RecyclerViewOnClickListener(getActivity(), new RecyclerViewOnClickListener.OnItemClickListener() {
             @Override
@@ -120,6 +128,14 @@ public class BeaconFragment extends Fragment {
         beaconScanner.stopScan();
     }
 
+    @Override
+    public void onDevicesUpdate(List<IBeaconDevice> devices) {
+        deviceList.clear();
+        deviceList.addAll(devices);
+
+        bAdapter.notifyDataSetChanged();
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -134,5 +150,4 @@ public class BeaconFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
 }

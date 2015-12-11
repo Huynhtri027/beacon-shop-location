@@ -22,9 +22,43 @@
 
         </android.support.design.widget.AppBarLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/product_search_layout"
+            android:layout_below="@id/toolbar_wrapper">
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="54dp"
+                android:id="@+id/product_search_text"
+                android:singleLine="true"
+                android:layout_alignParentLeft="true"
+                android:selectAllOnFocus="false"
+                android:layout_toLeftOf="@id/search_button"/>
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="54dp"
+                android:text="Search"
+                android:id="@+id/search_button"
+                android:layout_alignParentRight="true"
+                />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:text="Beacons"
+                android:id="@+id/beacon_button"
+                android:layout_below="@id/product_search_text"
+                android:paddingTop="8dp"
+                />
+
+        </RelativeLayout>
+
         <FrameLayout
             android:id="@+id/fragment"
-            android:layout_below="@id/toolbar_wrapper"
+            android:layout_below="@id/product_search_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

@@ -1,6 +1,8 @@
 package com.example.sebo.shoplocationmobile.fragments;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -10,9 +12,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.sebo.shoplocationmobile.R;
+import com.example.sebo.shoplocationmobile.beacons.BeaconVenue;
+import com.example.sebo.shoplocationmobile.beacons.MockBeaconLocation;
 import com.example.sebo.shoplocationmobile.products.Product;
 import com.example.sebo.shoplocationmobile.products.SearchEngine;
 import com.qozix.tileview.TileView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,6 +44,9 @@ public class MapFragment extends Fragment {
     private TileView tileView;
     private ImageView customerPositionMarker;
     private ImageView productPositionMarker;
+    private List<ImageView> beaconPositionMarkers;
+
+    private List<BeaconVenue> beaconVenues;
 
     /**
      * Use this factory method to create a new instance of
@@ -45,16 +55,20 @@ public class MapFragment extends Fragment {
      * @return A new instance of fragment MapFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MapFragment newInstance(String param1) {
-        MapFragment fragment = new MapFragment();
+    public static MapFragment newInstance(String param1, List<BeaconVenue> venues) {
         Bundle args = new Bundle();
+        MapFragment fragment = new MapFragment();
+
         args.putString(PRODUCT_ID, param1);
+
+        fragment.setBeaconVenues(venues);
         fragment.setArguments(args);
         return fragment;
     }
 
     public MapFragment() {
         // Required empty public constructor
+        beaconPositionMarkers = new ArrayList<>();
     }
 
     @Override
@@ -91,6 +105,8 @@ public class MapFragment extends Fragment {
             updateProductMarker(product.getPosX(), product.getPosY());
         }
 
+        refreshBeaconMarkers();
+
         return tileView;
     }
 
@@ -113,15 +129,42 @@ public class MapFragment extends Fragment {
     }
 
     public void updateProductMarker(double posX, double posY) {
-        if (customerPositionMarker == null) {
-            customerPositionMarker = new ImageView(getActivity().getApplicationContext());
-            customerPositionMarker.setImageResource(R.drawable.map_marker_blue);
+        if (productPositionMarker == null) {
+            productPositionMarker = new ImageView(getActivity().getApplicationContext());
+            productPositionMarker.setImageResource(R.drawable.map_marker_circle);
 
-            tileView.addMarker(customerPositionMarker, posX, posY, -0.5f, -0.5f);
+            tileView.addMarker(productPositionMarker, posX, posY, -0.5f, -0.5f);
             return;
         }
 
-        tileView.moveMarker(customerPositionMarker, posX, posY);
+        tileView.moveMarker(productPositionMarker, posX, posY);
+    }
+
+    public void setBeaconVenues(List<BeaconVenue> venues) {
+        this.beaconVenues = venues;
+    }
+
+    public void refreshBeaconMarkers() {
+        if (!isAdded())
+            return;
+
+        for (ImageView beaconMarker: beaconPositionMarkers) {
+            tileView.removeMarker(beaconMarker);
+        }
+
+        for (BeaconVenue venue: beaconVenues) {
+            addBeaconMarker(venue.getPosX(), venue.getPosY());
+        }
+    }
+
+    public void addBeaconMarker(double posX, double posY) {
+        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.alert_circle);
+
+        ImageView beaconMarker = new ImageView(getActivity().getApplicationContext());
+        beaconMarker.setImageBitmap(Bitmap.createScaledBitmap(image, 120, 120, false));
+
+        tileView.addMarker(beaconMarker, posX, posY, -0.5f, -1.0f);
+        beaconPositionMarkers.add(beaconMarker);
     }
 
     /**
