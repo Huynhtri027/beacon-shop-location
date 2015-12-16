@@ -38,20 +38,37 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
 
     public static final String TAG = BeaconScanner.class.getSimpleName();
 
-    private ProximityManager proximityManager;
-    private BeaconScanListener mListener;
+    public static final double OFFER_DISTANCE = 0.1;
+    public static final double LOCALIZATION_DISTANCE = 3;
 
-    public BeaconScanner(Context context, BeaconScanListener listener) {
-        this.mListener = listener;
+    private static BeaconScanner instance;
+
+    public static BeaconScanner getInstance(Context context) {
+        if (instance == null) {
+            instance = new BeaconScanner(context);
+        } else {
+            instance.setContext(context);
+        }
+
+        return instance;
+    }
+
+    private ProximityManager proximityManager;
+    private BeaconScanListener scanListener;
+    private BeaconRegionListener regionListener;
+    private Context context;
+
+    private BeaconScanner(Context context) {
+        setContext(context);
 
         IBeaconScanContext iBeaconScanContext = new IBeaconScanContext.Builder()
                 .setRssiCalculator(RssiCalculators.newLimitedMeanRssiCalculator(5))
                 .setEventTypes(EnumSet.of(EventType.SPACE_ENTERED, EventType.SPACE_ABANDONED, EventType.DEVICE_DISCOVERED, EventType.DEVICES_UPDATE))
                 .setDevicesUpdateCallbackInterval(TimeUnit.SECONDS.toMillis(2))
                 .setDistanceSort(DistanceSort.ASC)
-//                                .setIBeaconRegions(Collections.<IBeaconRegion>singletonList(
-//                                        new BeaconRegion(KontaktSDK.DEFAULT_KONTAKT_BEACON_PROXIMITY_UUID, 1, 2)
-//                                ))
+//                .setIBeaconRegions(Collections.<IBeaconRegion>singletonList(
+//                        new BeaconRegion(KontaktSDK.DEFAULT_KONTAKT_BEACON_PROXIMITY_UUID, 1, 2)
+//                ))
                 .build();
 
 
@@ -93,7 +110,23 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
             case DEVICES_UPDATE:
                 Log.d(TAG, iBeaconDeviceEvent.getRegion().toString());
                 List<IBeaconDevice> devices = iBeaconDeviceEvent.getDeviceList();
-                mListener.onDevicesUpdate(devices);
+
+                if (scanListener != null) {
+                    scanListener.onDevicesUpdate(devices);
+                }
+
+                for (IBeaconDevice device : devices) {
+                    if (regionListener != null) {
+                        if (device.getDistance() < OFFER_DISTANCE) {
+                            regionListener.onDeviceApproached(device.getUniqueId());
+                        }
+
+                        if (device.getDistance() < LOCALIZATION_DISTANCE) {
+                            regionListener.onLocationDetected(device.getUniqueId());
+                        }
+                    }
+                }
+
                 break;
             default:
                 Log.d(TAG, iBeaconDeviceEvent.getRegion().toString());
@@ -108,7 +141,32 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
         }
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setScanListener(BeaconScanListener scanListener) {
+        this.scanListener = scanListener;
+    }
+
+    public void setRegionListener(BeaconRegionListener regionListener) {
+        this.regionListener = regionListener;
+    }
+
+    public BeaconRegionListener getRegionListener() {
+        return regionListener;
+    }
+
+    public BeaconScanListener getScanListener() {
+        return scanListener;
+    }
+
     public interface BeaconScanListener {
         void onDevicesUpdate(List<IBeaconDevice> devices);
+    }
+
+    public interface BeaconRegionListener {
+        void onDeviceApproached(String beaconId);
+        void onLocationDetected(String beaconId);
     }
 }

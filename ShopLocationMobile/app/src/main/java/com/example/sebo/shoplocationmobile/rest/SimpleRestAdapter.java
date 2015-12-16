@@ -17,9 +17,25 @@ import retrofit.Retrofit;
  */
 public class SimpleRestAdapter {
 
-    public static final String API_URL = "http://webapp-juraszek.rhcloud.com";
+    public static final String API_URL = "http://beacon-location-rest.herokuapp.com";
 
     private Retrofit retrofitAdapter;
+
+    public SimpleRestAdapter() {
+        Gson gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+                .create();
+
+        // Add the interceptor to OkHttpClient
+        OkHttpClient client = new OkHttpClient();
+        client.interceptors().add(getDefaultInterceptor());
+
+        retrofitAdapter = new Retrofit.Builder()
+                .baseUrl(API_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(client)
+                .build();
+    }
 
     public SimpleRestAdapter(String url) {
         Gson gson = new GsonBuilder()

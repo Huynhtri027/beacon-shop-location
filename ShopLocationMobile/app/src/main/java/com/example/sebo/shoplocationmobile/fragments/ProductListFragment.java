@@ -1,5 +1,6 @@
 package com.example.sebo.shoplocationmobile.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.example.sebo.shoplocationmobile.R;
 import com.example.sebo.shoplocationmobile.activities.MainActivity;
@@ -22,6 +24,9 @@ import com.example.sebo.shoplocationmobile.products.Observer;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -29,14 +34,23 @@ public class ProductListFragment extends Fragment {
 
     public static final String TAG = ProductListFragment.class.getSimpleName();
 
+    public static final int DETAILS_ONCLICK = 0;
+    public static final int MAP_ONCLICK = 1;
+
     private List<Product> products;
     private ProductListAdapter adapter;
     private OnProductItemClickedListener mListener;
 
-    private RecyclerView productsRecyclerView;
+    private int viewType = MAP_ONCLICK;
 
-    public static ProductListFragment newInstance() {
-        return new ProductListFragment();
+    @Bind(R.id.products_list)
+    public RecyclerView productsRecyclerView;
+
+    public static ProductListFragment newInstance(int viewType) {
+        ProductListFragment plf = new ProductListFragment();
+        plf.setViewType(viewType);
+
+        return plf;
     }
 
     public ProductListFragment() {
@@ -65,8 +79,7 @@ public class ProductListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_product_list, container, false);
-
-        productsRecyclerView = (RecyclerView) view.findViewById(R.id.products_list);
+        ButterKnife.bind(this, view);
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getBaseContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -78,7 +91,7 @@ public class ProductListFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
                 Log.d(ProductListFragment.this.TAG, "clicked " + products.get(position));
-                mListener.onProductItemSelected(products.get(position).getId());
+                mListener.onProductItemSelected(products.get(position));
             }
         }));
 
@@ -105,8 +118,12 @@ public class ProductListFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    public void setViewType(int viewType) {
+        this.viewType = viewType;
+    }
+
 
     public interface OnProductItemClickedListener {
-        void onProductItemSelected(int productId);
+        void onProductItemSelected(Product product);
     }
 }

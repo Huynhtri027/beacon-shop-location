@@ -77,7 +77,8 @@ public class BeaconFragment extends Fragment implements BeaconScanner.BeaconScan
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        beaconScanner = new BeaconScanner(getActivity(), this);
+        beaconScanner = BeaconScanner.getInstance(getActivity());
+        beaconScanner.setScanListener(this);
     }
 
     @Override
@@ -125,7 +126,8 @@ public class BeaconFragment extends Fragment implements BeaconScanner.BeaconScan
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        beaconScanner.stopScan();
+
+        beaconScanner.setScanListener(null);
     }
 
     @Override

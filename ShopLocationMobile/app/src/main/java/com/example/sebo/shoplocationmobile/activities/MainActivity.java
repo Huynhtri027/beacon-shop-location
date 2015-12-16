@@ -1,25 +1,32 @@
 package com.example.sebo.shoplocationmobile.activities;
 
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.sebo.shoplocationmobile.beacons.BeaconVenue;
+import com.example.sebo.shoplocationmobile.beacons.BeaconScanner;
 import com.example.sebo.shoplocationmobile.beacons.SynchronizationManager;
 import com.example.sebo.shoplocationmobile.fragments.BeaconFragment;
 import com.example.sebo.shoplocationmobile.fragments.MapFragment;
 import com.example.sebo.shoplocationmobile.R;
 import com.example.sebo.shoplocationmobile.fragments.ProductListFragment;
 import com.example.sebo.shoplocationmobile.products.Observer;
+import com.example.sebo.shoplocationmobile.products.Product;
 import com.example.sebo.shoplocationmobile.products.SearchEngine;
+import com.example.sebo.shoplocationmobile.products.Sector;
+import com.example.sebo.shoplocationmobile.rest.ShopRestService;
+import com.example.sebo.shoplocationmobile.rest.SimpleRestAdapter;
+import com.kontakt.sdk.android.common.profile.IBeaconDevice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +34,12 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements ProductListFragment.OnProductItemClickedListener, MapFragment.OnFragmentInteractionListener, BeaconFragment.OnFragmentInteractionListener,
-        SynchronizationManager.SynchronizationManagerListener, Observer {
+        SynchronizationManager.SynchronizationManagerListener, Observer, BeaconScanner.BeaconRegionListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -39,19 +49,11 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
     @Bind(R.id.search_button)
     public Button searchButton;
 
-    @Bind(R.id.beacon_button)
-    public Button beaconButton;
-
     @OnClick(R.id.search_button)
     public void onSearchButtonClick() {
         searchEngine.executeSearch(searchText.getText().toString());
         searchText.setText("");
         searchText.clearFocus();
-    }
-
-    @OnClick(R.id.beacon_button)
-    public void onBeaconButtonClick() {
-        switchToBeaconFragment();
     }
 
     private STATE state;
@@ -60,9 +62,16 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
     private BeaconFragment beaconFragment;
 
     private SearchEngine searchEngine;
+    private BeaconScanner beaconScanner;
+
+    private ProgressDialog progressDialog;
+
+    private boolean retrievingBeaconData = false;
+    private String lastBeaconId = "";
 
     private SynchronizationManager syncManager;
-    private List<BeaconVenue> beaconVenues = new ArrayList<>();
+    private List<Sector> beaconVenues = new ArrayList<>();
+    private Pair<Double, Double> customerPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,12 +88,16 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
 
         searchEngine = SearchEngine.getInstance();
         searchEngine.registerObserver(this);
+
         syncManager = SynchronizationManager.getInstance();
         syncManager.setListener(this);
 
+        beaconScanner = BeaconScanner.getInstance(this);
+        beaconScanner.setRegionListener(this);
+
         syncData();
 
-        showInitialFragment();
+       // showInitialFragment();
     }
 
     @Override
@@ -107,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
         super.onDestroy();
 
         searchEngine.unregisterObserver(this);
+        beaconScanner.stopScan();
     }
 
     @Override
@@ -130,19 +144,15 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
         return super.onOptionsItemSelected(item);
     }
 
-    private void showInitialFragment() {
-        switchToProductListFragment();
-    }
-
     private void syncData() {
         syncManager.getBeaconsPosition();
     }
 
-    private void switchToProductListFragment() {
+    private void switchToProductListFragment(int viewType) {
         Log.d(TAG, "switchToProductListFragment() called with: " + "");
         state = STATE.PRODUCT_LIST;
 
-        productListFragment = ProductListFragment.newInstance();
+        productListFragment = ProductListFragment.newInstance(ProductListFragment.MAP_ONCLICK);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment, productListFragment, ProductListFragment.TAG);
         fragmentTransaction.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -150,10 +160,10 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
         fragmentTransaction.commitAllowingStateLoss();
     }
 
-    private void switchToMapFragment(String productId) {
+    private void switchToMapFragment(Pair<Double, Double> productLocation) {
         state = STATE.SHOP_MAP;
 
-        mapFragment = MapFragment.newInstance(productId, beaconVenues);
+        mapFragment = MapFragment.newInstance(productLocation, customerPosition);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment, mapFragment);
         fragmentTransaction.addToBackStack(ProductListFragment.TAG);
@@ -163,7 +173,8 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
     }
 
     public void switchToBeaconFragment() {
-        Log.d(TAG, "switchToProductListFragment() called with: " + "");
+        Log.d(TAG, "switchToBeaconListFragment() called with: " + "");
+        state = STATE.BEACON_LIST;
 
         beaconFragment = BeaconFragment.newInstance();
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
@@ -174,9 +185,9 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
     }
 
     @Override
-    public void onProductItemSelected(int productId) {
-        Log.d(TAG, "onProductItemSelected() called with: " + "productId = [" + productId + "]");
-        switchToMapFragment(String.valueOf(productId));
+    public void onProductItemSelected(Product product) {
+        Log.d(TAG, "onProductItemSelected() called with: " + "productId = [" + product.getId() + "]");
+        switchToMapFragment(findProductLocation(product));
 
 //        Product product = SearchEngine.getInstance().getProductById(productId);
 //        if (product != null) {
@@ -203,19 +214,86 @@ public class MainActivity extends AppCompatActivity implements ProductListFragme
     }
 
     @Override
-    public void onBeaconsPositionDownloaded(List<BeaconVenue> venues) {
+    public void onBeaconsPositionDownloaded(List<Sector> venues) {
         this.beaconVenues.clear();
         this.beaconVenues.addAll(venues);
-
-        if (this.mapFragment != null) {
-            this.mapFragment.refreshBeaconMarkers();
-        }
     }
 
     @Override
     public void inform() {
-        switchToProductListFragment();
+        if (state != STATE.PRODUCT_LIST) {
+            switchToProductListFragment(ProductListFragment.MAP_ONCLICK);
+        }
+
         productListFragment.setProducts(searchEngine.getSearchResult());
+    }
+
+    @Override
+    public void onDeviceApproached(String beaconId) {
+        Log.d(TAG, "onDeviceApproached() called with: " + "beaconId = [" + beaconId + "]");
+
+        if (retrievingBeaconData || lastBeaconId.equals(beaconId))
+            return;
+
+        Log.d(TAG, "device " + beaconId + " approached");
+        lastBeaconId = beaconId;
+        retrievingBeaconData = true;
+
+        showProgressDialog();
+        SimpleRestAdapter adapter = new SimpleRestAdapter();
+        ShopRestService restService = adapter.getRetrofitAdapter().create(ShopRestService.class);
+
+        restService.getProductsBySector(beaconId).enqueue(new Callback<List<Product>>() {
+            @Override
+            public void onResponse(Response<List<Product>> response, Retrofit retrofit) {
+                Log.d(TAG, "response: " + response.raw());
+                Log.d(TAG, "response: " + response.code() + " - " + response.message());
+                switchToProductListFragment(ProductListFragment.DETAILS_ONCLICK);
+                productListFragment.setProducts(response.body());
+                retrievingBeaconData = false;
+                progressDialog.hide();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d(TAG, "failure: " + t.getMessage());
+                lastBeaconId = "";
+                retrievingBeaconData = false;
+                progressDialog.hide();
+            }
+        });
+    }
+
+    @Override
+    public void onLocationDetected(String beaconId) {
+        Log.d(TAG, "onLocationDetected() called with: " + "beaconId = [" + beaconId + "]");
+
+        for (Sector sector: beaconVenues) {
+            if (sector.getId().equals(beaconId)) {
+                customerPosition = new Pair<>(sector.getPosX(), sector.getPosY());
+            }
+        }
+    }
+
+    private Pair<Double, Double> findProductLocation(Product p) {
+        for (Sector sector: beaconVenues) {
+            if (p.getSectorId().equals(sector.getId())) {
+                return new Pair<>(sector.getPosX(), sector.getPosY());
+            }
+        }
+
+        return null;
+    }
+
+    private void showProgressDialog() {
+        this.progressDialog = new ProgressDialog(this);
+
+        this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        this.progressDialog.setMessage("Loading... please wait...");
+        this.progressDialog.setCancelable(false);
+        this.progressDialog.setIndeterminate(true);
+
+        this.progressDialog.show();
     }
 
     private enum STATE {

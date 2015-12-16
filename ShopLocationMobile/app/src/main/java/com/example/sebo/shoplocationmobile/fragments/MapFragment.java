@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import com.example.sebo.shoplocationmobile.beacons.BeaconVenue;
 import com.example.sebo.shoplocationmobile.beacons.MockBeaconLocation;
 import com.example.sebo.shoplocationmobile.products.Product;
 import com.example.sebo.shoplocationmobile.products.SearchEngine;
+import com.example.sebo.shoplocationmobile.products.Sector;
 import com.qozix.tileview.TileView;
 
 import java.util.ArrayList;
@@ -46,7 +49,8 @@ public class MapFragment extends Fragment {
     private ImageView productPositionMarker;
     private List<ImageView> beaconPositionMarkers;
 
-    private List<BeaconVenue> beaconVenues;
+    private Pair<Double, Double> customerLocation;
+    private Pair<Double, Double> productLocation;
 
     /**
      * Use this factory method to create a new instance of
@@ -55,13 +59,14 @@ public class MapFragment extends Fragment {
      * @return A new instance of fragment MapFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MapFragment newInstance(String param1, List<BeaconVenue> venues) {
+    public static MapFragment newInstance(Pair<Double, Double> productLocation, Pair<Double, Double> customerLocation) {
         Bundle args = new Bundle();
         MapFragment fragment = new MapFragment();
 
-        args.putString(PRODUCT_ID, param1);
+//        args.putString(PRODUCT_ID, param1);
 
-        fragment.setBeaconVenues(venues);
+        fragment.setCustomerLocation(customerLocation);
+        fragment.setProductLocation(productLocation);
         fragment.setArguments(args);
         return fragment;
     }
@@ -99,10 +104,15 @@ public class MapFragment extends Fragment {
         tileView.setScaleLimits(0, 2);
         tileView.defineBounds(-20, 515, 320, -20);
 
-        if (productId != null) {
-            Product product = SearchEngine.getInstance().getProductById(Integer.valueOf(productId));
+        Log.d(TAG, "customer pos (" + customerLocation.first + ", " + customerLocation.second + "); product pos ("
+                + productLocation.first + ", " + productLocation.second + ")");
 
-            updateProductMarker(product.getPosX(), product.getPosY());
+        if (customerLocation != null) {
+            updateCustomerMarker(customerLocation);
+        }
+
+        if (productLocation != null) {
+            updateProductMarker(productLocation);
         }
 
         refreshBeaconMarkers();
@@ -128,20 +138,18 @@ public class MapFragment extends Fragment {
         mListener = null;
     }
 
-    public void updateProductMarker(double posX, double posY) {
+    public void updateProductMarker(Pair<Double, Double> productLocation) {
+        this.productLocation = productLocation;
+
         if (productPositionMarker == null) {
             productPositionMarker = new ImageView(getActivity().getApplicationContext());
             productPositionMarker.setImageResource(R.drawable.map_marker_circle);
 
-            tileView.addMarker(productPositionMarker, posX, posY, -0.5f, -0.5f);
+            tileView.addMarker(productPositionMarker, productLocation.first, productLocation.second, -0.5f, -0.5f);
             return;
         }
 
-        tileView.moveMarker(productPositionMarker, posX, posY);
-    }
-
-    public void setBeaconVenues(List<BeaconVenue> venues) {
-        this.beaconVenues = venues;
+        tileView.moveMarker(productPositionMarker, productLocation.first, productLocation.second);
     }
 
     public void refreshBeaconMarkers() {
@@ -151,10 +159,22 @@ public class MapFragment extends Fragment {
         for (ImageView beaconMarker: beaconPositionMarkers) {
             tileView.removeMarker(beaconMarker);
         }
+    }
 
-        for (BeaconVenue venue: beaconVenues) {
-            addBeaconMarker(venue.getPosX(), venue.getPosY());
+    public void updateCustomerMarker(Pair<Double, Double> pos) {
+        this.customerLocation = pos;
+
+        if (customerPositionMarker == null) {
+            customerPositionMarker = new ImageView(getActivity().getApplicationContext());
+
+            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.alert_circle);
+            customerPositionMarker.setImageBitmap(Bitmap.createScaledBitmap(image, 120, 120, false));
+
+            tileView.addMarker(customerPositionMarker, customerLocation.first, customerLocation.second, -0.5f, -1.0f);
+            return;
         }
+
+        tileView.addMarker(customerPositionMarker, pos.first, pos.second, -0.5f, -1.0f);
     }
 
     public void addBeaconMarker(double posX, double posY) {
@@ -165,6 +185,14 @@ public class MapFragment extends Fragment {
 
         tileView.addMarker(beaconMarker, posX, posY, -0.5f, -1.0f);
         beaconPositionMarkers.add(beaconMarker);
+    }
+
+    public void setCustomerLocation(Pair<Double, Double> customerLocation) {
+        this.customerLocation = customerLocation;
+    }
+
+    public void setProductLocation(Pair<Double, Double> productLocation) {
+        this.productLocation = productLocation;
     }
 
     /**

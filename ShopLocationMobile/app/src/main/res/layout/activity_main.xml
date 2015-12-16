@@ -45,15 +45,6 @@
                 android:layout_alignParentRight="true"
                 />
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:text="Beacons"
-                android:id="@+id/beacon_button"
-                android:layout_below="@id/product_search_text"
-                android:paddingTop="8dp"
-                />
-
         </RelativeLayout>
 
         <FrameLayout

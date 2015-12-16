@@ -6,31 +6,20 @@ package com.example.sebo.shoplocationmobile.products;
 public class Product {
 
     private int id;
-    private String title;
-    private String description;
+    private String sectorId;
+    private String name;
+    private String desc;
     private String icon;
-    private int price;
-    private double posX;
-    private double posY;
+    private double price;
 
-    public Product(int id, String title, String description, String icon, int price) {
+    public Product(int id, String sectorId, String name, String desc, String icon, double price) {
         this.id = id;
-        this.title = title;
-        this.description = description;
+        this.sectorId = sectorId;
+        this.name = name;
+        this.desc = desc;
         this.icon = icon;
         this.price = price;
     }
-
-    public Product(int id, String title, String description, String icon, int price, double posX, double posY) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.icon = icon;
-        this.price = price;
-        this.posX = posX;
-        this.posY = posY;
-    }
-
     public int getId() {
         return id;
     }
@@ -39,20 +28,20 @@ public class Product {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public String getIcon() {
@@ -63,7 +52,7 @@ public class Product {
         this.icon = icon;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 
@@ -71,19 +60,7 @@ public class Product {
         this.price = price;
     }
 
-    public double getPosX() {
-        return posX;
-    }
-
-    public void setPosX(double posX) {
-        this.posX = posX;
-    }
-
-    public double getPosY() {
-        return posY;
-    }
-
-    public void setPosY(double posY) {
-        this.posY = posY;
+    public String getSectorId() {
+        return sectorId;
     }
 }
