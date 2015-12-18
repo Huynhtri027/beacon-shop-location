@@ -102,10 +102,7 @@ public class MapFragment extends Fragment {
         tileView.addDetailLevel(0.25f, "room/250/%d_%d.png");
         tileView.addDetailLevel(0.125f, "room/125/%d_%d.png");
         tileView.setScaleLimits(0, 2);
-        tileView.defineBounds(-20, 515, 320, -20);
-
-        Log.d(TAG, "customer pos (" + customerLocation.first + ", " + customerLocation.second + "); product pos ("
-                + productLocation.first + ", " + productLocation.second + ")");
+        tileView.defineBounds(-20, 515, 320, -20);;
 
         if (customerLocation != null) {
             updateCustomerMarker(customerLocation);
@@ -143,9 +140,9 @@ public class MapFragment extends Fragment {
 
         if (productPositionMarker == null) {
             productPositionMarker = new ImageView(getActivity().getApplicationContext());
-            productPositionMarker.setImageResource(R.drawable.map_marker_circle);
+            productPositionMarker.setImageResource(R.drawable.map_marker);
 
-            tileView.addMarker(productPositionMarker, productLocation.first, productLocation.second, -0.5f, -0.5f);
+            tileView.addMarker(productPositionMarker, productLocation.first, productLocation.second, -0.5f, -1f);
             return;
         }
 
@@ -167,14 +164,14 @@ public class MapFragment extends Fragment {
         if (customerPositionMarker == null) {
             customerPositionMarker = new ImageView(getActivity().getApplicationContext());
 
-            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.alert_circle);
-            customerPositionMarker.setImageBitmap(Bitmap.createScaledBitmap(image, 120, 120, false));
-
-            tileView.addMarker(customerPositionMarker, customerLocation.first, customerLocation.second, -0.5f, -1.0f);
+            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.map_marker_circle);
+            customerPositionMarker.setImageBitmap(Bitmap.createScaledBitmap(image, 160, 160, false));
+//            customerPositionMarker.setImageResource(R.drawable.customer_position_marker);
+            tileView.addMarker(customerPositionMarker, customerLocation.first, customerLocation.second, -0.5f, -0.75f);
             return;
         }
 
-        tileView.addMarker(customerPositionMarker, pos.first, pos.second, -0.5f, -1.0f);
+        tileView.moveMarker(customerPositionMarker, pos.first, pos.second);
     }
 
     public void addBeaconMarker(double posX, double posY) {

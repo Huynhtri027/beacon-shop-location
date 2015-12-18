@@ -6,6 +6,7 @@ import com.example.sebo.shoplocationmobile.products.Sector;
 import com.example.sebo.shoplocationmobile.rest.ShopRestService;
 import com.example.sebo.shoplocationmobile.rest.SimpleRestAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit.Callback;
@@ -28,7 +29,10 @@ public class SynchronizationManager {
         return instance;
     }
 
+    private List<Sector> venues;
+
     private SynchronizationManager() {
+        venues = new ArrayList<>();
     }
 
     private SynchronizationManagerListener listener;
@@ -41,6 +45,8 @@ public class SynchronizationManager {
             @Override
             public void onResponse(Response<List<Sector>> response, Retrofit retrofit) {
                 listener.onBeaconsPositionDownloaded(response.body());
+                venues.clear();
+                venues.addAll(response.body());
                 Log.d(TAG, "sectors synced.");
             }
 
@@ -49,6 +55,10 @@ public class SynchronizationManager {
                 Log.d(TAG, "downloading sectors error: " + t.getMessage());
             }
         });
+    }
+
+    public List<Sector> getVenues() {
+        return venues;
     }
 
     public void setListener(SynchronizationManagerListener listener) {

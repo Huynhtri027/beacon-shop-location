@@ -110,20 +110,19 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
             case DEVICES_UPDATE:
                 Log.d(TAG, iBeaconDeviceEvent.getRegion().toString());
                 List<IBeaconDevice> devices = iBeaconDeviceEvent.getDeviceList();
+                IBeaconDevice closestDevice = devices.get(0);
 
                 if (scanListener != null) {
                     scanListener.onDevicesUpdate(devices);
                 }
 
-                for (IBeaconDevice device : devices) {
-                    if (regionListener != null) {
-                        if (device.getDistance() < OFFER_DISTANCE) {
-                            regionListener.onDeviceApproached(device.getUniqueId());
-                        }
+                if (closestDevice.getDistance() < LOCALIZATION_DISTANCE) {
+                    regionListener.onLocationDetected(closestDevice.getUniqueId());
+                }
 
-                        if (device.getDistance() < LOCALIZATION_DISTANCE) {
-                            regionListener.onLocationDetected(device.getUniqueId());
-                        }
+                for (IBeaconDevice device : devices) {
+                    if (regionListener != null && device.getDistance() < OFFER_DISTANCE) {
+                            regionListener.onDeviceApproached(device.getUniqueId());
                     }
                 }
 

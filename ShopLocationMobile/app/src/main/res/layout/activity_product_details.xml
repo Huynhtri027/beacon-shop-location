@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:fitsSystemWindows="true"
+    tools:context="com.example.sebo.shoplocationmobile.activities.ProductDetailsActivity">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/toolbar_wrapper"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent" android:theme="@style/AppTheme.AppBarOverlay"
+                android:layout_alignParentStart="true">
+
+                <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+                    android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary" app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            </android.support.design.widget.AppBarLayout>
+
+
+            <ImageView
+                android:id="@+id/product_large_image"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:scaleType="centerCrop"
+                android:layout_below="@id/toolbar_wrapper"
+                android:src="@drawable/pc_1"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/product_large_image" >
+
+                <TextView
+                    android:id="@+id/product_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="16dp"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/colorTextPrimary"
+                    android:text="Mleko łaciate"
+                    android:textSize="24dp" />
+
+                <RelativeLayout
+                    android:id="@+id/product_details_middle_layout"
+                    android:layout_below="@id/product_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp">
+
+                    <TextView
+                        android:id="@+id/product_description_short"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_toLeftOf="@+id/product_price"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:text="Mleko UHT 2.0% tłuszczu"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:id="@+id/product_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="24dp"
+                        android:layout_centerHorizontal="true"
+                        android:text="9999$"
+                        android:textSize="20dp" />
+
+                </RelativeLayout>
+
+
+
+                <TextView
+                    android:id="@+id/product_description_long"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/product_details_middle_layout"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:singleLine="false"
+                    android:layout_centerHorizontal="true"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc aliquam nulla et egestas scelerisque. Pellentesque vitae justo gravida, aliquet massa a, pellentesque diam. Morbi malesuada mauris mauris, et interdum urna commodo eget. Maecenas ullamcorper sollicitudin dolor, quis eleifend mi iaculis id. Sed ut massa massa."
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/product_details_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@id/product_large_image"
+        app:layout_anchorGravity="bottom|end"
+        android:src="@android:drawable/ic_dialog_map" />
+
+</android.support.design.widget.CoordinatorLayout>
