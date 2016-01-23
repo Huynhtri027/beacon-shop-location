@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.sebo.shoplocationmobile.R;
+import com.example.sebo.shoplocationmobile.presenters.MvpPresenter;
+import com.example.sebo.shoplocationmobile.presenters.ProductDetailsPresener;
 import com.example.sebo.shoplocationmobile.products.Product;
 import com.example.sebo.shoplocationmobile.products.SearchEngine;
 import com.squareup.okhttp.Interceptor;
@@ -20,7 +22,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ProductDetailsActivity extends AppCompatActivity {
+public class ProductDetailsActivity extends MvpActivity<ProductDetailsPresener> {
 
     public static Intent createIntent(Context context, int productId) {
         Bundle extras = new Bundle();
@@ -32,6 +34,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
         return intent;
     }
 
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
     @Bind(R.id.product_large_image)
     ImageView productImage;
     @Bind(R.id.product_title)
@@ -47,14 +51,13 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
     @OnClick(R.id.product_details_fab)
     public void onFabClick(View view) {
-        startActivity(MainActivity.createIntent(this, product.getId()));
+        presenter.showMap();
     }
-
-    private Product product;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_product_details);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -64,19 +67,26 @@ public class ProductDetailsActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            Integer productId = extras.getInt("productId");
-            product = SearchEngine.getInstance().getProductById(productId);
+            presenter.init(extras.getInt("productId"));
         } else {
             finish();
         }
-
-        toolbar.setTitle(product.getName());
-
-        productTitle.setText(product.getName());
-        productDescriptionShort.setText(product.getDesc());
-        productPrice.setText(product.getPrice() + "$");
     }
 
+    public void setToolbarTitle(String title) {
+        toolbar.setTitle(title);
+    }
+
+    public void setProductInfo(String title, String description, double price) {
+        productTitle.setText(title);
+        productDescriptionShort.setText(description);
+        productPrice.setText(price + "$");
+    }
+
+    @Override
+    protected ProductDetailsPresener createPresenter() {
+        return new ProductDetailsPresener();
+    }
 
 
 }

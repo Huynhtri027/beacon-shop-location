@@ -56,7 +56,11 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
     private ProximityManager proximityManager;
     private BeaconScanListener scanListener;
     private BeaconRegionListener regionListener;
+    private BeaconApproachListener approachListener;
     private Context context;
+
+    private BeaconScanner() {
+    }
 
     private BeaconScanner(Context context) {
         setContext(context);
@@ -121,8 +125,8 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
                 }
 
                 for (IBeaconDevice device : devices) {
-                    if (regionListener != null && device.getDistance() < OFFER_DISTANCE) {
-                            regionListener.onDeviceApproached(device.getUniqueId());
+                    if (approachListener != null && device.getDistance() < OFFER_DISTANCE) {
+                            approachListener.onDeviceApproached(device.getUniqueId());
                     }
                 }
 
@@ -152,6 +156,10 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
         this.regionListener = regionListener;
     }
 
+    public void setApproachListener(BeaconApproachListener approachListener) {
+        this.approachListener = approachListener;
+    }
+
     public BeaconRegionListener getRegionListener() {
         return regionListener;
     }
@@ -165,7 +173,10 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
     }
 
     public interface BeaconRegionListener {
-        void onDeviceApproached(String beaconId);
         void onLocationDetected(String beaconId);
+    }
+
+    public interface BeaconApproachListener {
+        void onDeviceApproached(String beaconId);
     }
 }

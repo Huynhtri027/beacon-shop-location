@@ -6,35 +6,36 @@
     android:layout_height="match_parent" android:fitsSystemWindows="true"
     tools:context="com.example.sebo.shoplocationmobile.activities.ProductDetailsActivity">
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <RelativeLayout
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/toolbar_wrapper"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent" android:theme="@style/AppTheme.AppBarOverlay"
+            android:layout_alignParentStart="true">
+
+            <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+                android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary" app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        </android.support.design.widget.AppBarLayout>
+
+
+        <ImageView
+            android:id="@+id/product_large_image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="160dp"
+            android:scaleType="centerCrop"
+            android:layout_below="@id/toolbar_wrapper"
+            android:src="@drawable/pc_1"/>
 
-            <android.support.design.widget.AppBarLayout
-                android:id="@+id/toolbar_wrapper"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent" android:theme="@style/AppTheme.AppBarOverlay"
-                android:layout_alignParentStart="true">
-
-                <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
-                    android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/colorPrimary" app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-            </android.support.design.widget.AppBarLayout>
-
-
-            <ImageView
-                android:id="@+id/product_large_image"
-                android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:scaleType="centerCrop"
-                android:layout_below="@id/toolbar_wrapper"
-                android:src="@drawable/pc_1"/>
+        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@id/product_large_image"
+            >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -98,10 +99,9 @@
                     android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc aliquam nulla et egestas scelerisque. Pellentesque vitae justo gravida, aliquet massa a, pellentesque diam. Morbi malesuada mauris mauris, et interdum urna commodo eget. Maecenas ullamcorper sollicitudin dolor, quis eleifend mi iaculis id. Sed ut massa massa."
                     android:textSize="20sp" />
             </RelativeLayout>
+        </ScrollView>
 
-        </RelativeLayout>
-
-    </ScrollView>
+    </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/product_details_fab"

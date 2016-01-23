@@ -1,22 +1,22 @@
 package com.example.sebo.shoplocationmobile.fragments;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import com.example.sebo.shoplocationmobile.R;
 import com.example.sebo.shoplocationmobile.activities.MainActivity;
 import com.example.sebo.shoplocationmobile.adapters.ProductListAdapter;
+import com.example.sebo.shoplocationmobile.presenters.ProductDetailsPresener;
+import com.example.sebo.shoplocationmobile.presenters.ProductListPresenter;
 import com.example.sebo.shoplocationmobile.products.Product;
 import com.example.sebo.shoplocationmobile.products.SearchEngine;
 import com.example.sebo.shoplocationmobile.products.Observer;
@@ -26,25 +26,19 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+import static android.util.Log.d;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ProductListFragment extends Fragment {
+public class ProductListFragment extends MvpFragment<ProductListPresenter> {
 
     public static final String TAG = ProductListFragment.class.getSimpleName();
 
     public static final int DETAILS_ONCLICK = 0;
     public static final int MAP_ONCLICK = 1;
-
-    private List<Product> products;
-    private ProductListAdapter adapter;
-    private OnProductItemClickedListener mListener;
-
-    private int viewType = MAP_ONCLICK;
-
-    @Bind(R.id.products_list)
-    public RecyclerView productsRecyclerView;
 
     public static ProductListFragment newInstance(int viewType) {
         ProductListFragment plf = new ProductListFragment();
@@ -52,6 +46,25 @@ public class ProductListFragment extends Fragment {
 
         return plf;
     }
+
+    @Bind(R.id.products_list)
+    public RecyclerView productsRecyclerView;
+    @Bind(R.id.product_search_text)
+    public EditText searchText;
+    @Bind(R.id.search_button)
+    public Button searchButton;
+
+    @OnClick(R.id.search_button)
+    public void onSearchButtonClick() {
+        presenter.search(searchText.getText().toString().trim());
+    }
+
+    private List<Product> products;
+    private ProductListAdapter adapter;
+    private OnProductItemClickedListener mListener;
+    private ProgressDialog progressDialog;
+
+    private int viewType = MAP_ONCLICK;
 
     public ProductListFragment() {
         this.products = new ArrayList<>();
@@ -62,16 +75,7 @@ public class ProductListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "observing search engine");
-
-        try {
-            mListener = (OnProductItemClickedListener) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-
-        Log.d(TAG, "listener: " + mListener);
+        d(TAG, "observing search engine");
     }
 
     @Override
@@ -90,7 +94,7 @@ public class ProductListFragment extends Fragment {
         productsRecyclerView.addOnItemTouchListener(new RecyclerViewOnClickListener(getActivity().getApplicationContext(), new RecyclerViewOnClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Log.d(ProductListFragment.this.TAG, "clicked " + products.get(position));
+                d(TAG, "clicked " + products.get(position));
                 mListener.onProductItemSelected(products.get(position));
             }
         }));
@@ -99,16 +103,23 @@ public class ProductListFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
+        try {
+            mListener = (OnProductItemClickedListener) getActivity();
+            d(TAG, "listener attached");
+        } catch (ClassCastException e) {
+            throw new ClassCastException(getActivity().toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
 
-        Log.d(TAG, "stopped observing search engine");
+        d(TAG, "listener detached");
         mListener = null;
     }
 
@@ -120,6 +131,31 @@ public class ProductListFragment extends Fragment {
 
     public void setViewType(int viewType) {
         this.viewType = viewType;
+    }
+
+    public void showProgressDialog() {
+        d(TAG, "showing progress dialog");
+        if (this.progressDialog == null) {
+            this.progressDialog = new ProgressDialog(getActivity());
+
+            this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            this.progressDialog.setMessage("Loading... please wait...");
+            this.progressDialog.setCancelable(false);
+            this.progressDialog.setIndeterminate(true);
+        }
+
+        this.progressDialog.show();
+    }
+
+    public void hideProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.hide();
+        }
+    }
+
+    @Override
+    protected ProductListPresenter createPresenter() {
+        return new ProductListPresenter();
     }
 
 

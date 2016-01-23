@@ -5,18 +5,36 @@
     android:paddingRight="4dp"
     tools:context=".ProductListFragment">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:id="@+id/fragment_product_list_focus_theief"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:layout_width="0px"
-        android:layout_height="0px" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/product_search_layout"
+        android:layout_alignParentTop="true">
+
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="54dp"
+            android:id="@+id/product_search_text"
+            android:singleLine="true"
+            android:layout_alignParentLeft="true"
+            android:selectAllOnFocus="false"
+            android:layout_toLeftOf="@id/search_button"/>
+
+        <Button
+            android:layout_width="120dp"
+            android:layout_height="54dp"
+            android:text="Search"
+            android:id="@+id/search_button"
+            android:layout_alignParentRight="true"
+            />
+
+
+    </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/products_list"
         android:scrollbars="vertical"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@id/product_search_layout"
         android:layout_width="match_parent"
         android:paddingTop="8dp"
         android:layout_height="fill_parent"/>
