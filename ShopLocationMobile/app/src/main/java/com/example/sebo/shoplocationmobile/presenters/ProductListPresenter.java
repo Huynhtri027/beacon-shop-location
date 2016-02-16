@@ -32,6 +32,7 @@ public class ProductListPresenter implements MvpPresenter<ProductListFragment>, 
     private boolean retrievingBeaconData;
 
     public ProductListPresenter() {
+        lastBeaconId = "";
         searchEngine = SearchEngine.getInstance();
     }
 
@@ -59,6 +60,7 @@ public class ProductListPresenter implements MvpPresenter<ProductListFragment>, 
 
     @Override
     public void inform() {
+        retrievingBeaconData = false;
         view.hideProgressDialog();
         view.setProducts(searchEngine.getSearchResult());
     }
@@ -76,26 +78,6 @@ public class ProductListPresenter implements MvpPresenter<ProductListFragment>, 
         retrievingBeaconData = true;
 
         view.showProgressDialog();
-        SimpleRestAdapter adapter = new SimpleRestAdapter();
-        ShopRestService restService = adapter.getRetrofitAdapter().create(ShopRestService.class);
-
-        restService.getProductsBySector(beaconId).enqueue(new Callback<List<Product>>() {
-            @Override
-            public void onResponse(Response<List<Product>> response, Retrofit retrofit) {
-                Log.d(TAG, "response: " + response.raw());
-                Log.d(TAG, "response: " + response.code() + " - " + response.message());
-                view.setProducts(response.body());
-                view.hideProgressDialog();
-                retrievingBeaconData = false;
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.d(TAG, "failure: " + t.getMessage());
-                lastBeaconId = "";
-                retrievingBeaconData = false;
-                view.hideProgressDialog();
-            }
-        });
+        searchEngine.getProductsByBeaconId(beaconId);
     }
 }

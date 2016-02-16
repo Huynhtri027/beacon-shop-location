@@ -126,7 +126,7 @@ public class BeaconScanner implements ProximityManager.ProximityListener {
 
                 for (IBeaconDevice device : devices) {
                     if (approachListener != null && device.getDistance() < OFFER_DISTANCE) {
-                            approachListener.onDeviceApproached(device.getUniqueId());
+                        approachListener.onDeviceApproached(device.getUniqueId());
                     }
                 }
 

@@ -51,6 +51,33 @@ public class SearchEngine extends Observable {
 //        Log.d(TAG, "products found: " + searchResult.size());
     }
 
+    public void getProductsByBeaconId(String beaconId) {
+        SimpleRestAdapter adapter = new SimpleRestAdapter();
+        ShopRestService restService = adapter.getRetrofitAdapter().create(ShopRestService.class);
+
+        restService.getProductsBySector(beaconId).enqueue(new Callback<List<Product>>() {
+            @Override
+            public void onResponse(Response<List<Product>> response, Retrofit retrofit) {
+                Log.d(TAG, "response: " + response.raw());
+                searchResult = response.body();
+                notifyObservers();
+                Log.d(TAG, "response: " + response.code() + " - " + response.message());
+//                view.setProducts(response.body());
+//                view.hideProgressDialog();
+//                retrievingBeaconData = false;
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d(TAG, "failure: " + t.getMessage());
+                notifyObservers();
+//                lastBeaconId = "";
+//                retrievingBeaconData = false;
+//                view.hideProgressDialog();
+            }
+        });
+    }
+
     public Product getProductById(int id) {
         if (searchResult != null) {
             for (Product p: searchResult)
